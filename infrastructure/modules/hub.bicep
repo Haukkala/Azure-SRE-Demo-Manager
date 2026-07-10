@@ -228,6 +228,9 @@ resource containerSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' 
   ]
   properties: {
     addressPrefix: containerSubnetPrefix
+      networkSecurityGroup: {
+      id: nsgAppService.id
+    }
     delegations: [
       {
         name: 'Microsoft.App/environments'
