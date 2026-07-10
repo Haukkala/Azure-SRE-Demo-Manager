@@ -447,7 +447,7 @@ module madridDcrAssociation 'modules/vm-dcr-association.bicep' = if (deployMadri
   name: 'madrid-dcr-association-deployment'
   params: {
     vmName: 'vm-madrid-api'
-    associationName: 'assoc-madrid-windows-events'
+    associationName: 'configurationAccessEndpoint'
     associationDescription: 'Collect Madrid Windows Event Viewer logs to Log Analytics'
     dataCollectionRuleId: vmLogCollection.outputs.madridWindowsEventsDcrId
     dataCollectionEndpointId: vmLogCollection.outputs.dataCollectionEndpointId
