@@ -70,7 +70,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = if (deployVM) {
   }
   properties: {
     hardwareProfile: {
-      vmSize: 'Standard_B2s' // Cost-optimized: 2 vCPUs, 4 GB RAM
+      vmSize: 'Standard_D2s_v3' // Cost-optimized: 2 vCPUs, 4 GB RAM
     }
     storageProfile: {
       imageReference: {

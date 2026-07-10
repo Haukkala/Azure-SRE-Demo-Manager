@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
-      "value": "swedencentral"
+      "value": "northeurope"
     },
     "environment": {
       "value": "dev"
@@ -12,7 +12,10 @@
       "value": "azureadmin"
     },
     "adminPassword": {
-      "value": "CHANGE_ME_P@ssw0rd123!"
+      "value": "jdGGK-s64311"
+    },
+    "allowedSourceIpPrefix": {
+      "value": "85.76.37.12/32"
     },
     "lisbonContainerImage": {
       "value": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
