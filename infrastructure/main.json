@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "3912711346720524297"
+      "templateHash": "4022505709915345679"
     }
   },
   "parameters": {
@@ -1373,7 +1373,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "18078312256482867029"
+              "templateHash": "18303060233066566699"
             }
           },
           "parameters": {
@@ -1474,7 +1474,7 @@
                     "transport": "auto",
                     "allowInsecure": false
                   },
-                  "registries": "[if(empty(parameters('containerRegistry')), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
+                  "registries": "[if(or(empty(parameters('containerRegistry')), not(startsWith(parameters('containerImage'), parameters('containerRegistry')))), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
                 },
                 "template": {
                   "containers": [
@@ -1675,7 +1675,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "5404190726687177891"
+              "templateHash": "13827881181972957011"
             }
           },
           "parameters": {
@@ -1750,7 +1750,7 @@
                     "transport": "auto",
                     "allowInsecure": false
                   },
-                  "registries": "[if(empty(parameters('containerRegistry')), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
+                  "registries": "[if(or(empty(parameters('containerRegistry')), not(startsWith(parameters('containerImage'), parameters('containerRegistry')))), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
                 },
                 "template": {
                   "containers": [
@@ -1945,7 +1945,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "11855681141793275775"
+              "templateHash": "2130245702484121061"
             }
           },
           "parameters": {
@@ -2027,7 +2027,7 @@
                     "transport": "auto",
                     "allowInsecure": false
                   },
-                  "registries": "[if(empty(parameters('containerRegistry')), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
+                  "registries": "[if(or(empty(parameters('containerRegistry')), not(startsWith(parameters('containerImage'), parameters('containerRegistry')))), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
                 },
                 "template": {
                   "containers": [
@@ -2319,7 +2319,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "9570597958833457094"
+              "templateHash": "1188907924134893959"
             }
           },
           "parameters": {
@@ -2495,7 +2495,7 @@
                     "transport": "auto",
                     "allowInsecure": false
                   },
-                  "registries": "[if(empty(parameters('containerRegistry')), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
+                  "registries": "[if(or(empty(parameters('containerRegistry')), not(startsWith(parameters('containerImage'), parameters('containerRegistry')))), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
                 },
                 "template": {
                   "containers": [
@@ -2909,7 +2909,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "11127584855852867662"
+              "templateHash": "2286891187478605608"
             }
           },
           "parameters": {
@@ -3045,7 +3045,7 @@
                     "transport": "http",
                     "allowInsecure": false
                   },
-                  "registries": "[if(empty(parameters('containerRegistry')), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
+                  "registries": "[if(or(empty(parameters('containerRegistry')), not(startsWith(parameters('containerImage'), parameters('containerRegistry')))), createArray(), createArray(createObject('server', parameters('containerRegistry'), 'identity', 'system')))]"
                 },
                 "template": {
                   "containers": [

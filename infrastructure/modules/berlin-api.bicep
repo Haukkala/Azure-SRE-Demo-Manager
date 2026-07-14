@@ -55,7 +55,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         transport: 'auto'
         allowInsecure: false
       }
-      registries: empty(containerRegistry) ? [] : [
+      // Only register ACR credentials when the image is actually hosted there - otherwise the
+      // container app's system identity (which doesn't have AcrPull yet; that's granted by a
+      // separate module that runs *after* this one) gets validated against a registry it will
+      // never pull from, and revision provisioning hangs until "Operation expired".
+      registries: (empty(containerRegistry) || !startsWith(containerImage, containerRegistry)) ? [] : [
         {
           server: containerRegistry
           identity: 'system'
