@@ -92,6 +92,8 @@ resource runnerSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' = {
     natGateway: {
       id: natGatewayId
     }
+    privateEndpointNetworkPolicies: 'Disabled'
+    defaultOutboundAccess: false
   }
 }
 

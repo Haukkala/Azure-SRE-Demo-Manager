@@ -216,6 +216,11 @@ resource vmSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' = {
     routeTable: {
       id: udrVms.id
     }
+    // Explicit to match reality: this subnet hosts pe-deployment-storage-blob (storage-private-endpoint.bicep).
+    // Left unset, Azure's default ('Enabled') diffs against the live value every redeploy, and toggling it
+    // while VM NICs / the private endpoint are attached triggers InUseSubnetCannotBeDeleted.
+    privateEndpointNetworkPolicies: 'Disabled'
+    defaultOutboundAccess: false
   }
 }
 
@@ -239,6 +244,8 @@ resource containerSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' 
         }
       }
     ]
+    privateEndpointNetworkPolicies: 'Disabled'
+    defaultOutboundAccess: false
   }
 }
 
@@ -268,6 +275,8 @@ resource appServiceSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01'
         }
       }
     ]
+    privateEndpointNetworkPolicies: 'Disabled'
+    defaultOutboundAccess: false
   }
 }
 
