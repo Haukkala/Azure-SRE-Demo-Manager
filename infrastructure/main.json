@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "7495299002948124264"
+      "templateHash": "10449837033673336178"
     }
   },
   "parameters": {
@@ -282,7 +282,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "17016181838649501630"
+              "templateHash": "14329912828173230525"
             }
           },
           "parameters": {
@@ -507,7 +507,7 @@
             },
             {
               "type": "Microsoft.Network/virtualNetworks",
-              "apiVersion": "2023-05-01",
+              "apiVersion": "2024-05-01",
               "name": "vnet-parking-hub",
               "location": "[parameters('location')]",
               "tags": "[parameters('tags')]",
@@ -516,7 +516,8 @@
                   "addressPrefixes": [
                     "[parameters('vnetAddressPrefix')]"
                   ]
-                }
+                },
+                "privateEndpointVNetPolicies": "Disabled"
               }
             },
             {

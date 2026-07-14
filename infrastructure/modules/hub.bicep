@@ -191,7 +191,7 @@ resource udrAppService 'Microsoft.Network/routeTables@2023-05-01' = {
 }
 
 // Create Virtual Network (without inline subnets to avoid conflicts on redeployment)
-resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
+resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   name: 'vnet-parking-hub'
   location: location
   tags: tags
@@ -201,6 +201,12 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
         vnetAddressPrefix
       ]
     }
+    // Vnet-wide counterpart of the per-subnet privateEndpointNetworkPolicies setting. Left unset,
+    // every redeploy resets it to the provider default and Azure re-evaluates policy across every
+    // subnet in the vnet atomically - requiring all attached NICs/private endpoints to be
+    // temporarily detachable, which is the actual trigger behind InUseSubnetCannotBeDeleted
+    // (it fails on the vnet PUT itself, not a specific subnet's PUT).
+    privateEndpointVNetPolicies: 'Disabled'
   }
 }
 
