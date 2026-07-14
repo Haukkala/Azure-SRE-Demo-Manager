@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "16867984656714833848"
+      "templateHash": "3912711346720524297"
     }
   },
   "parameters": {
@@ -1373,7 +1373,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "5374247497818191145"
+              "templateHash": "18078312256482867029"
             }
           },
           "parameters": {
@@ -1513,26 +1513,6 @@
                         {
                           "name": "CHAOS_CONTROL_URL",
                           "value": "[parameters('chaosControlUrl')]"
-                        }
-                      ],
-                      "probes": [
-                        {
-                          "type": "liveness",
-                          "httpGet": {
-                            "path": "/",
-                            "port": 80
-                          },
-                          "initialDelaySeconds": 10,
-                          "periodSeconds": 30
-                        },
-                        {
-                          "type": "readiness",
-                          "httpGet": {
-                            "path": "/",
-                            "port": 80
-                          },
-                          "initialDelaySeconds": 5,
-                          "periodSeconds": 10
                         }
                       ]
                     }
@@ -1695,7 +1675,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "17878820169829780945"
+              "templateHash": "5404190726687177891"
             }
           },
           "parameters": {
@@ -1801,26 +1781,6 @@
                         {
                           "name": "NODE_ENV",
                           "value": "production"
-                        }
-                      ],
-                      "probes": [
-                        {
-                          "type": "liveness",
-                          "httpGet": {
-                            "path": "/",
-                            "port": 80
-                          },
-                          "initialDelaySeconds": 10,
-                          "periodSeconds": 30
-                        },
-                        {
-                          "type": "readiness",
-                          "httpGet": {
-                            "path": "/",
-                            "port": 80
-                          },
-                          "initialDelaySeconds": 5,
-                          "periodSeconds": 10
                         }
                       ]
                     }
@@ -1985,7 +1945,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "15004757029038839606"
+              "templateHash": "11855681141793275775"
             }
           },
           "parameters": {
@@ -2090,26 +2050,6 @@
                         {
                           "name": "CHAOS_ENVIRONMENT",
                           "value": "[parameters('environment')]"
-                        }
-                      ],
-                      "probes": [
-                        {
-                          "type": "liveness",
-                          "httpGet": {
-                            "path": "/",
-                            "port": 80
-                          },
-                          "initialDelaySeconds": 10,
-                          "periodSeconds": 30
-                        },
-                        {
-                          "type": "readiness",
-                          "httpGet": {
-                            "path": "/",
-                            "port": 80
-                          },
-                          "initialDelaySeconds": 5,
-                          "periodSeconds": 10
                         }
                       ]
                     }

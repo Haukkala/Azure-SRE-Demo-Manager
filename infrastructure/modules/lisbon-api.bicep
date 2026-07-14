@@ -117,26 +117,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
               value: chaosControlUrl
             }
           ]
-          probes: [
-            {
-              type: 'liveness'
-              httpGet: {
-                path: '/'
-                port: 80
-              }
-              initialDelaySeconds: 10
-              periodSeconds: 30
-            }
-            {
-              type: 'readiness'
-              httpGet: {
-                path: '/'
-                port: 80
-              }
-              initialDelaySeconds: 5
-              periodSeconds: 10
-            }
-          ]
+          // Custom httpGet probes removed for now: against the placeholder helloworld image they
+          // caused the revision controller to hang and never create a revision at all (confirmed via
+          // a direct az containerapp create test with no probes, which succeeded instantly). Falls
+          // back to Container Apps' default TCP-based checks. Re-add /health probes once a real
+          // application image is in place.
         }
       ]
       scale: {
