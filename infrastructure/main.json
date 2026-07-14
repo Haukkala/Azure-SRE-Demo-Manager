@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "4480300090927483561"
+      "templateHash": "7495299002948124264"
     }
   },
   "parameters": {
@@ -282,7 +282,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "11965408651597392564"
+              "templateHash": "17016181838649501630"
             }
           },
           "parameters": {
@@ -530,7 +530,9 @@
                 },
                 "routeTable": {
                   "id": "[resourceId('Microsoft.Network/routeTables', 'udr-vms')]"
-                }
+                },
+                "privateEndpointNetworkPolicies": "Disabled",
+                "defaultOutboundAccess": false
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-vms')]",
@@ -554,7 +556,9 @@
                       "serviceName": "Microsoft.App/environments"
                     }
                   }
-                ]
+                ],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "defaultOutboundAccess": false
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]",
@@ -581,7 +585,9 @@
                       "serviceName": "Microsoft.Web/serverFarms"
                     }
                   }
-                ]
+                ],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "defaultOutboundAccess": false
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-container-apps')]",
@@ -693,7 +699,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "17426679052413855030"
+              "templateHash": "7791454979658628790"
             }
           },
           "parameters": {
@@ -805,7 +811,9 @@
                 },
                 "natGateway": {
                   "id": "[parameters('natGatewayId')]"
-                }
+                },
+                "privateEndpointNetworkPolicies": "Disabled",
+                "defaultOutboundAccess": false
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-github-actions')]"
@@ -3332,7 +3340,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "15624219412732412543"
+              "templateHash": "10230153752625893737"
             }
           },
           "parameters": {
@@ -3401,6 +3409,7 @@
               }
             },
             {
+              "condition": "[parameters('deployVM')]",
               "type": "Microsoft.Network/networkInterfaces",
               "apiVersion": "2023-05-01",
               "name": "nic-madrid-vm",
@@ -3536,7 +3545,7 @@
             },
             "privateIpAddress": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', 'nic-madrid-vm'), '2023-05-01').ipConfigurations[0].properties.privateIPAddress]"
+              "value": "[if(parameters('deployVM'), reference(resourceId('Microsoft.Network/networkInterfaces', 'nic-madrid-vm'), '2023-05-01').ipConfigurations[0].properties.privateIPAddress, '')]"
             },
             "publicIpAddress": {
               "type": "string",
@@ -3548,7 +3557,7 @@
             },
             "apiUrl": {
               "type": "string",
-              "value": "[if(and(parameters('deployVM'), parameters('createPublicIp')), format('http://{0}:3002', reference(resourceId('Microsoft.Network/publicIPAddresses', 'pip-madrid-vm'), '2023-05-01').dnsSettings.fqdn), format('http://{0}:3002', reference(resourceId('Microsoft.Network/networkInterfaces', 'nic-madrid-vm'), '2023-05-01').ipConfigurations[0].properties.privateIPAddress))]"
+              "value": "[if(and(parameters('deployVM'), parameters('createPublicIp')), format('http://{0}:3002', reference(resourceId('Microsoft.Network/publicIPAddresses', 'pip-madrid-vm'), '2023-05-01').dnsSettings.fqdn), if(parameters('deployVM'), format('http://{0}:3002', reference(resourceId('Microsoft.Network/networkInterfaces', 'nic-madrid-vm'), '2023-05-01').ipConfigurations[0].properties.privateIPAddress), ''))]"
             }
           }
         }
@@ -3598,7 +3607,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "11679762138640608904"
+              "templateHash": "5568304645089665205"
             }
           },
           "parameters": {
@@ -3667,6 +3676,7 @@
               }
             },
             {
+              "condition": "[parameters('deployVM')]",
               "type": "Microsoft.Network/networkInterfaces",
               "apiVersion": "2023-05-01",
               "name": "nic-paris-vm",
@@ -3802,7 +3812,7 @@
             },
             "privateIpAddress": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', 'nic-paris-vm'), '2023-05-01').ipConfigurations[0].properties.privateIPAddress]"
+              "value": "[if(parameters('deployVM'), reference(resourceId('Microsoft.Network/networkInterfaces', 'nic-paris-vm'), '2023-05-01').ipConfigurations[0].properties.privateIPAddress, '')]"
             },
             "publicIpAddress": {
               "type": "string",
@@ -3814,7 +3824,7 @@
             },
             "apiUrl": {
               "type": "string",
-              "value": "[if(and(parameters('deployVM'), parameters('createPublicIp')), format('http://{0}:3003', reference(resourceId('Microsoft.Network/publicIPAddresses', 'pip-paris-vm'), '2023-05-01').dnsSettings.fqdn), format('http://{0}:3003', reference(resourceId('Microsoft.Network/networkInterfaces', 'nic-paris-vm'), '2023-05-01').ipConfigurations[0].properties.privateIPAddress))]"
+              "value": "[if(and(parameters('deployVM'), parameters('createPublicIp')), format('http://{0}:3003', reference(resourceId('Microsoft.Network/publicIPAddresses', 'pip-paris-vm'), '2023-05-01').dnsSettings.fqdn), if(parameters('deployVM'), format('http://{0}:3003', reference(resourceId('Microsoft.Network/networkInterfaces', 'nic-paris-vm'), '2023-05-01').ipConfigurations[0].properties.privateIPAddress), ''))]"
             }
           }
         }

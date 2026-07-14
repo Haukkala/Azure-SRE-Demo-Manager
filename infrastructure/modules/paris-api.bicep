@@ -37,8 +37,9 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2023-05-01' = if (createP
   }
 }
 
-// Network Interface
-resource nic 'Microsoft.Network/networkInterfaces@2023-05-01' = {
+// Network Interface (only when the VM is deployed - an orphaned NIC still occupies an IP
+// config on snet-vms and can block subnet updates even if the VM itself is disabled)
+resource nic 'Microsoft.Network/networkInterfaces@2023-05-01' = if (deployVM) {
   name: 'nic-paris-vm'
   location: location
   tags: tags
@@ -173,7 +174,7 @@ npm --version
 output vmName string = deployVM ? vm!.name : ''
 output vmId string = deployVM ? vm!.id : ''
 output vmPrincipalId string = deployVM ? vm!.identity.principalId : ''
-output privateIpAddress string = nic.properties.ipConfigurations[0].properties.privateIPAddress
+output privateIpAddress string = deployVM ? nic!.properties.ipConfigurations[0].properties.privateIPAddress : ''
 output publicIpAddress string = (deployVM && createPublicIp) ? publicIp!.properties.ipAddress : ''
 output fqdn string = (deployVM && createPublicIp) ? publicIp!.properties.dnsSettings.fqdn : ''
-output apiUrl string = (deployVM && createPublicIp) ? 'http://${publicIp!.properties.dnsSettings.fqdn}:3003' : 'http://${nic.properties.ipConfigurations[0].properties.privateIPAddress}:3003'
+output apiUrl string = (deployVM && createPublicIp) ? 'http://${publicIp!.properties.dnsSettings.fqdn}:3003' : (deployVM ? 'http://${nic!.properties.ipConfigurations[0].properties.privateIPAddress}:3003' : '')
