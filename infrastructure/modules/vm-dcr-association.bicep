@@ -1,11 +1,11 @@
 @description('Name of the target virtual machine in this resource group')
 param vmName string
 
-@description('Data Collection Rule resource ID')
-param dataCollectionRuleId string
+@description('Data Collection Rule resource ID (leave empty if this association is endpoint-only)')
+param dataCollectionRuleId string = ''
 
-@description('Data Collection Endpoint resource ID')
-param dataCollectionEndpointId string
+@description('Data Collection Endpoint resource ID (leave empty if this association is rule-only)')
+param dataCollectionEndpointId string = ''
 
 @description('Association resource name')
 param associationName string
@@ -20,11 +20,11 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' existing = {
 resource dcrAssociation 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = {
   scope: vm
   name: associationName
-  properties: {
-    dataCollectionRuleId: dataCollectionRuleId
-    dataCollectionEndpointId: dataCollectionEndpointId
-    description: associationDescription
-  }
+  properties: union(
+    empty(dataCollectionRuleId) ? {} : { dataCollectionRuleId: dataCollectionRuleId },
+    empty(dataCollectionEndpointId) ? {} : { dataCollectionEndpointId: dataCollectionEndpointId },
+    { description: associationDescription }
+  )
 }
 
 output dcrAssociationId string = dcrAssociation.id

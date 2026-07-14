@@ -442,14 +442,36 @@ module vmLogCollection 'modules/data-collection-rules.bicep' = {
   }
 }
 
+module madridDceAssociation 'modules/vm-dcr-association.bicep' = if (deployMadridVm) {
+  scope: madridRg
+  name: 'madrid-dce-association-deployment'
+  params: {
+    vmName: 'vm-madrid-api'
+    associationName: 'configurationAccessEndpoint'
+    dataCollectionEndpointId: vmLogCollection.outputs.dataCollectionEndpointId
+  }
+}
+
 module madridDcrAssociation 'modules/vm-dcr-association.bicep' = if (deployMadridVm) {
   scope: madridRg
   name: 'madrid-dcr-association-deployment'
   params: {
     vmName: 'vm-madrid-api'
-    associationName: 'configurationAccessEndpoint'
+    associationName: 'assoc-madrid-windows-events'
     associationDescription: 'Collect Madrid Windows Event Viewer logs to Log Analytics'
     dataCollectionRuleId: vmLogCollection.outputs.madridWindowsEventsDcrId
+  }
+  dependsOn: [
+    madridDceAssociation
+  ]
+}
+
+module parisDceAssociation 'modules/vm-dcr-association.bicep' = if (deployParisVm) {
+  scope: parisRg
+  name: 'paris-dce-association-deployment'
+  params: {
+    vmName: 'vm-paris-api'
+    associationName: 'configurationAccessEndpoint'
     dataCollectionEndpointId: vmLogCollection.outputs.dataCollectionEndpointId
   }
 }
@@ -462,8 +484,10 @@ module parisDcrAssociation 'modules/vm-dcr-association.bicep' = if (deployParisV
     associationName: 'assoc-paris-syslog'
     associationDescription: 'Collect Paris Linux syslog logs to Log Analytics'
     dataCollectionRuleId: vmLogCollection.outputs.parisSyslogDcrId
-    dataCollectionEndpointId: vmLogCollection.outputs.dataCollectionEndpointId
   }
+  dependsOn: [
+    parisDceAssociation
+  ]
 }
 
 // ========================================

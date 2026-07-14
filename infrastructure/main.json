@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "16703473203605035762"
+      "templateHash": "4480300090927483561"
     }
   },
   "parameters": {
@@ -4058,7 +4058,7 @@
       "condition": "[parameters('deployMadridVm')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
-      "name": "madrid-dcr-association-deployment",
+      "name": "madrid-dce-association-deployment",
       "resourceGroup": "[variables('madridRgName')]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -4070,13 +4070,7 @@
             "value": "vm-madrid-api"
           },
           "associationName": {
-            "value": "assoc-madrid-windows-events"
-          },
-          "associationDescription": {
-            "value": "Collect Madrid Windows Event Viewer logs to Log Analytics"
-          },
-          "dataCollectionRuleId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment'), '2025-04-01').outputs.madridWindowsEventsDcrId.value]"
+            "value": "configurationAccessEndpoint"
           },
           "dataCollectionEndpointId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment'), '2025-04-01').outputs.dataCollectionEndpointId.value]"
@@ -4089,7 +4083,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "17851711612343290806"
+              "templateHash": "14403521401112820230"
             }
           },
           "parameters": {
@@ -4101,14 +4095,16 @@
             },
             "dataCollectionRuleId": {
               "type": "string",
+              "defaultValue": "",
               "metadata": {
-                "description": "Data Collection Rule resource ID"
+                "description": "Data Collection Rule resource ID (leave empty if this association is endpoint-only)"
               }
             },
             "dataCollectionEndpointId": {
               "type": "string",
+              "defaultValue": "",
               "metadata": {
-                "description": "Data Collection Endpoint resource ID"
+                "description": "Data Collection Endpoint resource ID (leave empty if this association is rule-only)"
               }
             },
             "associationName": {
@@ -4131,11 +4127,7 @@
               "apiVersion": "2022-06-01",
               "scope": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
               "name": "[parameters('associationName')]",
-              "properties": {
-                "dataCollectionRuleId": "[parameters('dataCollectionRuleId')]",
-                "dataCollectionEndpointId": "[parameters('dataCollectionEndpointId')]",
-                "description": "[parameters('associationDescription')]"
-              }
+              "properties": "[union(if(empty(parameters('dataCollectionRuleId')), createObject(), createObject('dataCollectionRuleId', parameters('dataCollectionRuleId'))), if(empty(parameters('dataCollectionEndpointId')), createObject(), createObject('dataCollectionEndpointId', parameters('dataCollectionEndpointId'))), createObject('description', parameters('associationDescription')))]"
             }
           ],
           "outputs": {
@@ -4148,6 +4140,188 @@
       },
       "dependsOn": [
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('madridRgName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment')]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployMadridVm')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "madrid-dcr-association-deployment",
+      "resourceGroup": "[variables('madridRgName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "vmName": {
+            "value": "vm-madrid-api"
+          },
+          "associationName": {
+            "value": "assoc-madrid-windows-events"
+          },
+          "associationDescription": {
+            "value": "Collect Madrid Windows Event Viewer logs to Log Analytics"
+          },
+          "dataCollectionRuleId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment'), '2025-04-01').outputs.madridWindowsEventsDcrId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "14403521401112820230"
+            }
+          },
+          "parameters": {
+            "vmName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the target virtual machine in this resource group"
+              }
+            },
+            "dataCollectionRuleId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Data Collection Rule resource ID (leave empty if this association is endpoint-only)"
+              }
+            },
+            "dataCollectionEndpointId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Data Collection Endpoint resource ID (leave empty if this association is rule-only)"
+              }
+            },
+            "associationName": {
+              "type": "string",
+              "metadata": {
+                "description": "Association resource name"
+              }
+            },
+            "associationDescription": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Association description"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+              "apiVersion": "2022-06-01",
+              "scope": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
+              "name": "[parameters('associationName')]",
+              "properties": "[union(if(empty(parameters('dataCollectionRuleId')), createObject(), createObject('dataCollectionRuleId', parameters('dataCollectionRuleId'))), if(empty(parameters('dataCollectionEndpointId')), createObject(), createObject('dataCollectionEndpointId', parameters('dataCollectionEndpointId'))), createObject('description', parameters('associationDescription')))]"
+            }
+          ],
+          "outputs": {
+            "dcrAssociationId": {
+              "type": "string",
+              "value": "[extensionResourceId(resourceId('Microsoft.Compute/virtualMachines', parameters('vmName')), 'Microsoft.Insights/dataCollectionRuleAssociations', parameters('associationName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('madridRgName')), 'Microsoft.Resources/deployments', 'madrid-dce-association-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('madridRgName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment')]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployParisVm')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "paris-dce-association-deployment",
+      "resourceGroup": "[variables('parisRgName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "vmName": {
+            "value": "vm-paris-api"
+          },
+          "associationName": {
+            "value": "configurationAccessEndpoint"
+          },
+          "dataCollectionEndpointId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment'), '2025-04-01').outputs.dataCollectionEndpointId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "14403521401112820230"
+            }
+          },
+          "parameters": {
+            "vmName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the target virtual machine in this resource group"
+              }
+            },
+            "dataCollectionRuleId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Data Collection Rule resource ID (leave empty if this association is endpoint-only)"
+              }
+            },
+            "dataCollectionEndpointId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Data Collection Endpoint resource ID (leave empty if this association is rule-only)"
+              }
+            },
+            "associationName": {
+              "type": "string",
+              "metadata": {
+                "description": "Association resource name"
+              }
+            },
+            "associationDescription": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Association description"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+              "apiVersion": "2022-06-01",
+              "scope": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
+              "name": "[parameters('associationName')]",
+              "properties": "[union(if(empty(parameters('dataCollectionRuleId')), createObject(), createObject('dataCollectionRuleId', parameters('dataCollectionRuleId'))), if(empty(parameters('dataCollectionEndpointId')), createObject(), createObject('dataCollectionEndpointId', parameters('dataCollectionEndpointId'))), createObject('description', parameters('associationDescription')))]"
+            }
+          ],
+          "outputs": {
+            "dcrAssociationId": {
+              "type": "string",
+              "value": "[extensionResourceId(resourceId('Microsoft.Compute/virtualMachines', parameters('vmName')), 'Microsoft.Insights/dataCollectionRuleAssociations', parameters('associationName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('parisRgName'))]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment')]"
       ]
     },
@@ -4174,9 +4348,6 @@
           },
           "dataCollectionRuleId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment'), '2025-04-01').outputs.parisSyslogDcrId.value]"
-          },
-          "dataCollectionEndpointId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment'), '2025-04-01').outputs.dataCollectionEndpointId.value]"
           }
         },
         "template": {
@@ -4186,7 +4357,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "17851711612343290806"
+              "templateHash": "14403521401112820230"
             }
           },
           "parameters": {
@@ -4198,14 +4369,16 @@
             },
             "dataCollectionRuleId": {
               "type": "string",
+              "defaultValue": "",
               "metadata": {
-                "description": "Data Collection Rule resource ID"
+                "description": "Data Collection Rule resource ID (leave empty if this association is endpoint-only)"
               }
             },
             "dataCollectionEndpointId": {
               "type": "string",
+              "defaultValue": "",
               "metadata": {
-                "description": "Data Collection Endpoint resource ID"
+                "description": "Data Collection Endpoint resource ID (leave empty if this association is rule-only)"
               }
             },
             "associationName": {
@@ -4228,11 +4401,7 @@
               "apiVersion": "2022-06-01",
               "scope": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
               "name": "[parameters('associationName')]",
-              "properties": {
-                "dataCollectionRuleId": "[parameters('dataCollectionRuleId')]",
-                "dataCollectionEndpointId": "[parameters('dataCollectionEndpointId')]",
-                "description": "[parameters('associationDescription')]"
-              }
+              "properties": "[union(if(empty(parameters('dataCollectionRuleId')), createObject(), createObject('dataCollectionRuleId', parameters('dataCollectionRuleId'))), if(empty(parameters('dataCollectionEndpointId')), createObject(), createObject('dataCollectionEndpointId', parameters('dataCollectionEndpointId'))), createObject('description', parameters('associationDescription')))]"
             }
           ],
           "outputs": {
@@ -4244,6 +4413,7 @@
         }
       },
       "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('parisRgName')), 'Microsoft.Resources/deployments', 'paris-dce-association-deployment')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('parisRgName'))]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'vm-log-collection-deployment')]"
       ]
