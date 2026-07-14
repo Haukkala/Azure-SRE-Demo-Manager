@@ -45,9 +45,13 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   properties: {
     environmentId: containerAppEnvironment.id
     configuration: {
+      // TODO: targetPort/probes point at 80 + '/' to match the placeholder
+      // mcr.microsoft.com/azuredocs/containerapps-helloworld image (main.parameters.json doesn't
+      // override berlinContainerImage yet). Once a real image listening on 3004 with /health
+      // is pushed via CI/CD, restore targetPort: 3004 and the /health probes below.
       ingress: {
         external: true
-        targetPort: 3004
+        targetPort: 80
         transport: 'auto'
         allowInsecure: false
       }
@@ -93,8 +97,8 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             {
               type: 'liveness'
               httpGet: {
-                path: '/health'
-                port: 3004
+                path: '/'
+                port: 80
               }
               initialDelaySeconds: 10
               periodSeconds: 30
@@ -102,8 +106,8 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             {
               type: 'readiness'
               httpGet: {
-                path: '/health'
-                port: 3004
+                path: '/'
+                port: 80
               }
               initialDelaySeconds: 5
               periodSeconds: 10

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "3786236219049494250"
+      "templateHash": "16867984656714833848"
     }
   },
   "parameters": {
@@ -1373,7 +1373,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "6159044091078476050"
+              "templateHash": "5374247497818191145"
             }
           },
           "parameters": {
@@ -1470,7 +1470,7 @@
                 "configuration": {
                   "ingress": {
                     "external": true,
-                    "targetPort": 3001,
+                    "targetPort": 80,
                     "transport": "auto",
                     "allowInsecure": false
                   },
@@ -1519,8 +1519,8 @@
                         {
                           "type": "liveness",
                           "httpGet": {
-                            "path": "/health",
-                            "port": 3001
+                            "path": "/",
+                            "port": 80
                           },
                           "initialDelaySeconds": 10,
                           "periodSeconds": 30
@@ -1528,8 +1528,8 @@
                         {
                           "type": "readiness",
                           "httpGet": {
-                            "path": "/health",
-                            "port": 3001
+                            "path": "/",
+                            "port": 80
                           },
                           "initialDelaySeconds": 5,
                           "periodSeconds": 10
@@ -1695,7 +1695,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "17423617138427712422"
+              "templateHash": "17878820169829780945"
             }
           },
           "parameters": {
@@ -1766,7 +1766,7 @@
                 "configuration": {
                   "ingress": {
                     "external": true,
-                    "targetPort": 3004,
+                    "targetPort": 80,
                     "transport": "auto",
                     "allowInsecure": false
                   },
@@ -1807,8 +1807,8 @@
                         {
                           "type": "liveness",
                           "httpGet": {
-                            "path": "/health",
-                            "port": 3004
+                            "path": "/",
+                            "port": 80
                           },
                           "initialDelaySeconds": 10,
                           "periodSeconds": 30
@@ -1816,8 +1816,8 @@
                         {
                           "type": "readiness",
                           "httpGet": {
-                            "path": "/health",
-                            "port": 3004
+                            "path": "/",
+                            "port": 80
                           },
                           "initialDelaySeconds": 5,
                           "periodSeconds": 10
@@ -1985,7 +1985,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "3076496195145319132"
+              "templateHash": "15004757029038839606"
             }
           },
           "parameters": {
@@ -2063,7 +2063,7 @@
                 "configuration": {
                   "ingress": {
                     "external": true,
-                    "targetPort": 3090,
+                    "targetPort": 80,
                     "transport": "auto",
                     "allowInsecure": false
                   },
@@ -2096,8 +2096,8 @@
                         {
                           "type": "liveness",
                           "httpGet": {
-                            "path": "/health",
-                            "port": 3090
+                            "path": "/",
+                            "port": 80
                           },
                           "initialDelaySeconds": 10,
                           "periodSeconds": 30
@@ -2105,8 +2105,8 @@
                         {
                           "type": "readiness",
                           "httpGet": {
-                            "path": "/health",
-                            "port": 3090
+                            "path": "/",
+                            "port": 80
                           },
                           "initialDelaySeconds": 5,
                           "periodSeconds": 10
