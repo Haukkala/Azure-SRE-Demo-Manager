@@ -265,12 +265,97 @@ resource containerSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' 
 // Note: snet-github-runners subnet is created by github-runner-network.bicep module
 // with proper GitHub.Network/networkSettings delegation. It is not created here to avoid conflicts.
 
+// Azure Container Apps environments cannot share a subnet with each other (a hard platform limit,
+// confirmed via ManagedEnvironmentSubnetInUse - not a sizing or timing issue). Chaos Control keeps
+// snet-container-apps; Lisbon, Berlin, and the (currently disabled) Berlin MCP server each need
+// their own dedicated delegated subnet.
+resource lisbonAppsSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' = {
+  parent: vnet
+  name: 'snet-lisbon-apps'
+  dependsOn: [
+    containerSubnet
+  ]
+  properties: {
+    addressPrefix: '10.0.6.0/24'
+    networkSecurityGroup: {
+      id: nsgAppService.id
+    }
+    delegations: [
+      {
+        name: 'Microsoft.App/environments'
+        properties: {
+          serviceName: 'Microsoft.App/environments'
+        }
+      }
+    ]
+    privateEndpointNetworkPolicies: 'Disabled'
+    defaultOutboundAccess: false
+    natGateway: {
+      id: natGateway.id
+    }
+  }
+}
+
+resource berlinAppsSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' = {
+  parent: vnet
+  name: 'snet-berlin-apps'
+  dependsOn: [
+    lisbonAppsSubnet
+  ]
+  properties: {
+    addressPrefix: '10.0.7.0/24'
+    networkSecurityGroup: {
+      id: nsgAppService.id
+    }
+    delegations: [
+      {
+        name: 'Microsoft.App/environments'
+        properties: {
+          serviceName: 'Microsoft.App/environments'
+        }
+      }
+    ]
+    privateEndpointNetworkPolicies: 'Disabled'
+    defaultOutboundAccess: false
+    natGateway: {
+      id: natGateway.id
+    }
+  }
+}
+
+resource berlinMcpAppsSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' = {
+  parent: vnet
+  name: 'snet-berlin-mcp-apps'
+  dependsOn: [
+    berlinAppsSubnet
+  ]
+  properties: {
+    addressPrefix: '10.0.8.0/24'
+    networkSecurityGroup: {
+      id: nsgAppService.id
+    }
+    delegations: [
+      {
+        name: 'Microsoft.App/environments'
+        properties: {
+          serviceName: 'Microsoft.App/environments'
+        }
+      }
+    ]
+    privateEndpointNetworkPolicies: 'Disabled'
+    defaultOutboundAccess: false
+    natGateway: {
+      id: natGateway.id
+    }
+  }
+}
+
 // Add App Service subnet with Web Server delegation
 resource appServiceSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' = {
   parent: vnet
   name: 'snet-app-service'
   dependsOn: [
-    containerSubnet
+    berlinMcpAppsSubnet
   ]
   properties: {
     addressPrefix: '10.0.5.0/24'
@@ -314,6 +399,9 @@ output vnetId string = vnet.id
 output vnetName string = vnet.name
 output vmSubnetId string = vmSubnet.id
 output containerSubnetId string = containerSubnet.id
+output lisbonAppsSubnetId string = lisbonAppsSubnet.id
+output berlinAppsSubnetId string = berlinAppsSubnet.id
+output berlinMcpAppsSubnetId string = berlinMcpAppsSubnet.id
 // Note: runnerSubnetId is not output here as the subnet is created by github-runner-network.bicep
 output appServiceSubnetId string = appServiceSubnet.id
 output logAnalyticsWorkspaceId string = logAnalytics.id

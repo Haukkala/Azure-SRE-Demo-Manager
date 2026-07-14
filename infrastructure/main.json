@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "12988233177051668552"
+      "templateHash": "13609297071897587635"
     }
   },
   "parameters": {
@@ -282,7 +282,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "8042895606360925820"
+              "templateHash": "1657199238109811548"
             }
           },
           "parameters": {
@@ -574,6 +574,96 @@
             {
               "type": "Microsoft.Network/virtualNetworks/subnets",
               "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', 'vnet-parking-hub', 'snet-lisbon-apps')]",
+              "properties": {
+                "addressPrefix": "10.0.6.0/24",
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]"
+                },
+                "delegations": [
+                  {
+                    "name": "Microsoft.App/environments",
+                    "properties": {
+                      "serviceName": "Microsoft.App/environments"
+                    }
+                  }
+                ],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "defaultOutboundAccess": false,
+                "natGateway": {
+                  "id": "[resourceId('Microsoft.Network/natGateways', 'ngw-github-runners')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-container-apps')]",
+                "[resourceId('Microsoft.Network/natGateways', 'ngw-github-runners')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', 'vnet-parking-hub')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', 'vnet-parking-hub', 'snet-berlin-apps')]",
+              "properties": {
+                "addressPrefix": "10.0.7.0/24",
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]"
+                },
+                "delegations": [
+                  {
+                    "name": "Microsoft.App/environments",
+                    "properties": {
+                      "serviceName": "Microsoft.App/environments"
+                    }
+                  }
+                ],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "defaultOutboundAccess": false,
+                "natGateway": {
+                  "id": "[resourceId('Microsoft.Network/natGateways', 'ngw-github-runners')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-lisbon-apps')]",
+                "[resourceId('Microsoft.Network/natGateways', 'ngw-github-runners')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', 'vnet-parking-hub')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', 'vnet-parking-hub', 'snet-berlin-mcp-apps')]",
+              "properties": {
+                "addressPrefix": "10.0.8.0/24",
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]"
+                },
+                "delegations": [
+                  {
+                    "name": "Microsoft.App/environments",
+                    "properties": {
+                      "serviceName": "Microsoft.App/environments"
+                    }
+                  }
+                ],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "defaultOutboundAccess": false,
+                "natGateway": {
+                  "id": "[resourceId('Microsoft.Network/natGateways', 'ngw-github-runners')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-berlin-apps')]",
+                "[resourceId('Microsoft.Network/natGateways', 'ngw-github-runners')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', 'vnet-parking-hub')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets",
+              "apiVersion": "2023-05-01",
               "name": "[format('{0}/{1}', 'vnet-parking-hub', 'snet-app-service')]",
               "properties": {
                 "addressPrefix": "10.0.5.0/24",
@@ -595,7 +685,7 @@
                 "defaultOutboundAccess": false
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-container-apps')]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-berlin-mcp-apps')]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]",
                 "[resourceId('Microsoft.Network/routeTables', 'udr-app-service')]",
                 "[resourceId('Microsoft.Network/virtualNetworks', 'vnet-parking-hub')]"
@@ -634,6 +724,18 @@
             "containerSubnetId": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-container-apps')]"
+            },
+            "lisbonAppsSubnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-lisbon-apps')]"
+            },
+            "berlinAppsSubnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-berlin-apps')]"
+            },
+            "berlinMcpAppsSubnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-berlin-mcp-apps')]"
             },
             "appServiceSubnetId": {
               "type": "string",
@@ -1347,7 +1449,7 @@
             "value": "[parameters('location')]"
           },
           "containerSubnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment'), '2025-04-01').outputs.containerSubnetId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment'), '2025-04-01').outputs.lisbonAppsSubnetId.value]"
           },
           "logAnalyticsWorkspaceId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment'), '2025-04-01').outputs.logAnalyticsWorkspaceId.value]"
@@ -1568,7 +1670,6 @@
       },
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'container-registry-deployment')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('berlinRgName')), 'Microsoft.Resources/deployments', 'berlin-api-deployment')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('chaosControlRgName')), 'Microsoft.Resources/deployments', 'chaos-control-deployment')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('lisbonRgName'))]"
@@ -1659,7 +1760,7 @@
             "value": "[parameters('location')]"
           },
           "containerSubnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment'), '2025-04-01').outputs.containerSubnetId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment'), '2025-04-01').outputs.berlinAppsSubnetId.value]"
           },
           "containerImage": {
             "value": "[parameters('berlinContainerImage')]"
@@ -1838,7 +1939,6 @@
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'container-registry-deployment')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('berlinRgName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('chaosControlRgName')), 'Microsoft.Resources/deployments', 'chaos-control-deployment')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment')]"
       ]
     },
@@ -2891,7 +2991,7 @@
             "value": "[parameters('environment')]"
           },
           "containerSubnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment'), '2025-04-01').outputs.containerSubnetId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment'), '2025-04-01').outputs.berlinMcpAppsSubnetId.value]"
           },
           "berlinApiUrl": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('berlinRgName')), 'Microsoft.Resources/deployments', 'berlin-api-deployment'), '2025-04-01').outputs.containerAppUrl.value]"
@@ -3174,8 +3274,7 @@
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'container-registry-deployment')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('berlinRgName')), 'Microsoft.Resources/deployments', 'berlin-api-deployment')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('berlinMcpRgName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('lisbonRgName')), 'Microsoft.Resources/deployments', 'lisbon-api-deployment')]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment')]"
       ]
     },
     {
