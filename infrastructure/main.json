@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "10449837033673336178"
+      "templateHash": "3786236219049494250"
     }
   },
   "parameters": {
@@ -282,7 +282,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "14329912828173230525"
+              "templateHash": "8042895606360925820"
             }
           },
           "parameters": {
@@ -559,9 +559,13 @@
                   }
                 ],
                 "privateEndpointNetworkPolicies": "Disabled",
-                "defaultOutboundAccess": false
+                "defaultOutboundAccess": false,
+                "natGateway": {
+                  "id": "[resourceId('Microsoft.Network/natGateways', 'ngw-github-runners')]"
+                }
               },
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', 'ngw-github-runners')]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-app-service')]",
                 "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-parking-hub', 'snet-vms')]",
                 "[resourceId('Microsoft.Network/virtualNetworks', 'vnet-parking-hub')]"

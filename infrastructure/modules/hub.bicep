@@ -252,6 +252,13 @@ resource containerSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' 
     ]
     privateEndpointNetworkPolicies: 'Disabled'
     defaultOutboundAccess: false
+    // Without an explicit outbound path, this subnet has no internet egress (defaultOutboundAccess:
+    // false, no route to 0.0.0.0/0), so the Container Apps environment can never pull its image -
+    // revisions fail with "Operation expired" and never actually get created. NAT gateways can be
+    // shared across subnets in the same vnet, so reuse the one already provisioned for the runner subnet.
+    natGateway: {
+      id: natGateway.id
+    }
   }
 }
 
