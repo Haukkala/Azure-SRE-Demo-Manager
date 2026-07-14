@@ -250,6 +250,12 @@ module lisbonApi 'modules/lisbon-api.bicep' = {
     chaosControlUrl: chaosControl.outputs.containerAppUrl
     tags: tags
   }
+  // See the dependsOn note on berlinApi: Lisbon also provisions its own Container Apps environment
+  // on the same shared subnet, so it must not run concurrently with Berlin's environment creation
+  // either (the chaosControlUrl param already forces an implicit dependency on chaosControl).
+  dependsOn: [
+    berlinApi
+  ]
 }
 
 // Grant Container App access to ACR
@@ -276,6 +282,13 @@ module berlinApi 'modules/berlin-api.bicep' = {
     containerRegistry: createContainerRegistry ? acr!.outputs.loginServer : containerRegistry
     tags: tags
   }
+  // Explicit dependsOn: Berlin, Chaos Control, and Lisbon each provision their own Container Apps
+  // managed environment bound to the same snet-container-apps subnet. Azure only allows one
+  // environment to bind/claim that subnet at a time - running these in parallel races and fails
+  // with ManagedEnvironmentSubnetInUse / ManagedEnvironmentOperationInProgress. Serialize them.
+  dependsOn: [
+    chaosControl
+  ]
 }
 
 // Grant Container App access to ACR
@@ -378,6 +391,12 @@ module berlinMcpServer 'modules/berlin-mcp-server.bicep' = if (deployBerlinMcp) 
     containerRegistry: createContainerRegistry ? acr!.outputs.loginServer : containerRegistry
     tags: tags
   }
+  // See the dependsOn note on berlinApi/lisbonApi: this also provisions its own Container Apps
+  // environment on the same shared subnet (berlinApiUrl already forces an implicit dependency on
+  // berlinApi, but not on lisbonApi's own environment creation).
+  dependsOn: [
+    lisbonApi
+  ]
 }
 
 // Grant Berlin MCP Server Container App access to ACR
