@@ -1,6 +1,32 @@
 # Demo instructions
 
+## Pre-demo checklist
+
+Run through this before every customer demo — a stale environment or an unbuilt image will make
+Chat 1/3 look broken even though the platform itself is fine:
+
+- [ ] **Deploy/verify the environment.** `cd infrastructure && ./deploy.sh` completes with zero
+      failed resources. If the resource groups were torn down since the last demo, this takes
+      ~15-20 minutes end to end.
+- [ ] **Build and push the real container image(s) to ACR.** Lisbon, Berlin, and Chaos Control
+      currently run the placeholder `mcr.microsoft.com/azuredocs/containerapps-helloworld` image —
+      see the warning below. Build and push the actual parking-api images before relying on the
+      backend-validation or dependency-diagram chats for meaningful output.
+- [ ] **Update `allowedSourceIpPrefix`** in `infrastructure/main.parameters.json` if your IP has
+      changed since the last deploy, then redeploy — otherwise SSH/RDP to the VMs is blocked.
+- [ ] **Verify the SRE Agent's resource mapping/discovery** reflects the current environment —
+      re-run resource discovery in the SRE Agent console if the environment was redeployed or
+      resource names changed (e.g. a new ACR/Storage account suffix after a from-scratch redeploy).
+
 ## Demo agenda (60 min)
+
+> ⚠️ **Placeholder images in use.** Lisbon, Berlin, and Chaos Control container apps currently run
+> the default `mcr.microsoft.com/azuredocs/containerapps-helloworld` demo image, not the real
+> parking-api logic (see `infrastructure/DEPLOYMENT_CHANGES.md` for why). Their telemetry is real —
+> Application Insights, dependency calls, response codes — but reflects a generic "hello world" app,
+> not actual parking-availability logic. **Build and push the real container images before a
+> customer demo**, or Chat 1 (backend validation) and Chat 3 (dependency diagram) will produce
+> technically-correct-but-meaningless results.
 
 - 15 min — What is Azure SRE? What Azure SRE is not.
   - Azure Docs
@@ -20,7 +46,7 @@
   - Chat #2 — Alerts — Open alert, check results + create a GitHub issue
   - Chat #3 — App Dependencies — Understand application dependencies via telemetry
   - Chat #4 — Windows Logs (Madrid API)
-  - Chat #5 — Linux Logs (Paris API)
+  - Chat #5 — Linux Logs (Paris API) — **not available with the default config** (`deployParisVm=false`); Chat #4 covers the VM/OS-log scenario in full instead
   - Chat #6 — 3rd-party API — Assess Berlin API via MCP
 
 ## Chat 1 — Generic — Daily Report + backend validation
@@ -51,12 +77,21 @@ Summarize this in a table.
 
 ## Chat 4 — Madrid API (Windows Logs — Event Viewer)
 
+Runs with the default configuration and demonstrates the full VM/OS-log scenario — use this as the
+primary "non-containerized backend" chat while Paris (Chat 5) is disabled.
+
 ```prompt
 Check Madrid API response status codes, errors and response time in the last 24h, including a summary of call per operation. Format the results in a visual table.
 
 ```
 
 ## Chat 5 — Paris API (Linux Logs — Syslog)
+
+> **Not available with the default configuration.** Paris does not deploy by default
+> (`deployParisVm=false` in `infrastructure/main.parameters.json` — see the root `README.md` for
+> why). Use **Chat 4 (Madrid API / Windows Event Viewer)** instead; it covers the same VM/OS-log
+> scenario end to end. Re-enable Paris (`deployParisVm=true`, then redeploy) if the Linux/Syslog
+> scenario specifically is needed for a demo. The prompt below is kept for that case.
 
 ```prompt
 Check Paris API response status codes, errors and response time in the last 24h.
