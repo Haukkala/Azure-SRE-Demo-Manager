@@ -16,16 +16,22 @@ param vmHealthControlUrl string = ''
 @description('Tags to apply to resources')
 param tags object = {}
 
-// App Service Plan (Linux, B1 tier for cost optimization)
+// App Service Plan (Linux, F1 Free tier).
+// NOTE: this subscription has 0 quota for the standardAv2Family VM family (covers Basic/Standard
+// tiers) in northeurope - Premium v3 has quota instead but costs meaningfully more. F1 runs on
+// shared multi-tenant compute and doesn't draw from that quota pool. Trade-offs: no custom
+// domains/SSL, ~60 min/day compute quota, no VNet integration, no Always On. Fine for a demo
+// frontend; move to a paid tier (and request an Av2 quota increase, or use Premium v3) for
+// anything beyond that.
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: 'asp-parking-frontend'
   location: location
   tags: tags
   sku: {
-    name: 'B1'
-    tier: 'Basic'
-    size: 'B1'
-    family: 'B'
+    name: 'F1'
+    tier: 'Free'
+    size: 'F1'
+    family: 'F'
     capacity: 1
   }
   kind: 'linux'
@@ -58,7 +64,7 @@ resource appService 'Microsoft.Web/sites@2023-01-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'NODE|18-lts'
-      alwaysOn: true
+      alwaysOn: false // Always On isn't available on the Free (F1) tier
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
       appSettings: [
