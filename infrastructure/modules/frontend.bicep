@@ -16,22 +16,20 @@ param vmHealthControlUrl string = ''
 @description('Tags to apply to resources')
 param tags object = {}
 
-// App Service Plan (Linux, Premium v3 P0v3).
-// NOTE: this subscription's landing zone has 0 quota for standardAv2Family (Basic/Standard) in
-// northeurope, and F1 (Free) hit the identical InternalSubscriptionIsOverQuotaForSku block too -
-// this environment appears to disallow every non-Premium-v3 App Service Plan tier outright.
-// Premium v3 (standardDDv4Family) is the only tier confirmed to have available quota (360 cores).
-// This is a real recurring cost, unlike Basic/Free - request an Av2 quota increase if a cheaper
-// tier becomes viable later.
+// App Service Plan (Linux, B1 tier for cost optimization).
+// NOTE: this plan deliberately runs in westeurope (see the `frontendLocation` param and the
+// comment on the frontend module call in main.bicep) - App Service has a hard 0-quota block for
+// every tier (Basic, Free, Premium v3) on this subscription in northeurope specifically, confirmed
+// by the identical SKU deploying instantly once pointed at westeurope instead.
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: 'asp-parking-frontend'
   location: location
   tags: tags
   sku: {
-    name: 'P0v3'
-    tier: 'PremiumV3'
-    size: 'P0v3'
-    family: 'Dv3'
+    name: 'B1'
+    tier: 'Basic'
+    size: 'B1'
+    family: 'B'
     capacity: 1
   }
   kind: 'linux'

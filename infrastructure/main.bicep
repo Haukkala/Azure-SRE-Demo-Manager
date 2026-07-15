@@ -4,6 +4,9 @@ targetScope = 'subscription'
 @description('Primary location for all resources')
 param location string = 'swedencentral'
 
+@description('Location for the frontend App Service (separate from `location` since App Service capacity/quota can be restricted per-region independently of the rest of the stack)')
+param frontendLocation string = 'westeurope'
+
 @description('Environment name (e.g., dev, test, prod)')
 @allowed([
   'dev'
@@ -520,7 +523,12 @@ module frontend 'modules/frontend.bicep' = {
   scope: frontendRg
   name: 'frontend-deployment'
   params: {
-    location: location
+    // App Service (Microsoft.Web/serverfarms) has a hard 0-quota block in northeurope on this
+    // subscription for every tier (Basic, Free, Premium v3) - confirmed via the identical SKU
+    // deploying instantly in westeurope. Everything else stays in `location`; only the frontend
+    // App Service Plan/Web App/App Insights move to westeurope, which is fully valid since
+    // resources in a resource group can each target any region independently.
+    location: frontendLocation
     logAnalyticsWorkspaceId: hub.outputs.logAnalyticsWorkspaceId
     lisbonApiUrl: lisbonApi.outputs.containerAppUrl
     madridApiUrl: madridApi.outputs.apiUrl

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "15154231709605584281"
+      "templateHash": "17526801056961430460"
     }
   },
   "parameters": {
@@ -14,6 +14,13 @@
       "defaultValue": "swedencentral",
       "metadata": {
         "description": "Primary location for all resources"
+      }
+    },
+    "frontendLocation": {
+      "type": "string",
+      "defaultValue": "westeurope",
+      "metadata": {
+        "description": "Location for the frontend App Service (separate from `location` since App Service capacity/quota can be restricted per-region independently of the rest of the stack)"
       }
     },
     "environment": {
@@ -4641,7 +4648,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[parameters('frontendLocation')]"
           },
           "logAnalyticsWorkspaceId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('hubRgName')), 'Microsoft.Resources/deployments', 'hub-deployment'), '2025-04-01').outputs.logAnalyticsWorkspaceId.value]"
@@ -4675,7 +4682,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "13586889847944273953"
+              "templateHash": "6637773190888662799"
             }
           },
           "parameters": {
@@ -4734,10 +4741,10 @@
               "location": "[parameters('location')]",
               "tags": "[parameters('tags')]",
               "sku": {
-                "name": "P0v3",
-                "tier": "PremiumV3",
-                "size": "P0v3",
-                "family": "Dv3",
+                "name": "B1",
+                "tier": "Basic",
+                "size": "B1",
+                "family": "B",
                 "capacity": 1
               },
               "kind": "linux",
