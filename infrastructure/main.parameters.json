@@ -11,9 +11,6 @@
     "adminUsername": {
       "value": "azureadmin"
     },
-    "adminPassword": {
-      "value": "jdGGK-s64311"
-    },
     "allowedSourceIpPrefix": {
       "value": "85.76.37.12/32"
     },
