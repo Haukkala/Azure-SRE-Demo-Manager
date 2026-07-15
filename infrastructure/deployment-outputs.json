@@ -1,15 +1,67 @@
 {
+  "berlinApiUrl": {
+    "type": "String",
+    "value": "https://ca-parking-berlin.jollyforest-5193f17e.northeurope.azurecontainerapps.io"
+  },
+  "berlinMcpAppInsightsName": {
+    "type": "String",
+    "value": ""
+  },
+  "berlinMcpContainerAppName": {
+    "type": "String",
+    "value": ""
+  },
+  "berlinMcpLogAnalyticsWorkspaceName": {
+    "type": "String",
+    "value": ""
+  },
+  "berlinMcpResourceGroup": {
+    "type": "String",
+    "value": ""
+  },
+  "berlinMcpServerUrl": {
+    "type": "String",
+    "value": ""
+  },
+  "berlinResourceGroup": {
+    "type": "String",
+    "value": "rg-parking-berlin-dev"
+  },
+  "chaosControlContainerAppName": {
+    "type": "String",
+    "value": "ca-chaos-control"
+  },
+  "chaosControlResourceGroup": {
+    "type": "String",
+    "value": "rg-parking-chaos-dev"
+  },
+  "chaosControlUrl": {
+    "type": "String",
+    "value": "https://ca-chaos-control.livelysand-7bf24936.northeurope.azurecontainerapps.io"
+  },
   "containerRegistryLoginServer": {
     "type": "String",
-    "value": "acrparkingdev725vs7xw6g7qg.azurecr.io"
+    "value": "acrparkingdeveppberkjlhisy.azurecr.io"
   },
   "containerRegistryName": {
     "type": "String",
-    "value": "acrparkingdev725vs7xw6g7qg"
+    "value": "acrparkingdeveppberkjlhisy"
   },
   "containerRegistryUrl": {
     "type": "String",
-    "value": "https://acrparkingdev725vs7xw6g7qg.azurecr.io"
+    "value": "https://acrparkingdeveppberkjlhisy.azurecr.io"
+  },
+  "dataCollectionEndpointId": {
+    "type": "String",
+    "value": "/subscriptions/cb92ee6d-15c0-45db-9ebe-46de98b27caf/resourceGroups/rg-parking-hub-dev/providers/Microsoft.Insights/dataCollectionEndpoints/dce-parking-vm-logs"
+  },
+  "deploymentStorageAccountName": {
+    "type": "String",
+    "value": "stpkdepeppberkjlhisy"
+  },
+  "deploymentStorageBlobEndpoint": {
+    "type": "String",
+    "value": "https://stpkdepeppberkjlhisy.blob.core.windows.net/"
   },
   "frontendResourceGroup": {
     "type": "String",
@@ -17,7 +69,11 @@
   },
   "frontendUrl": {
     "type": "String",
-    "value": "https://app-parking-frontend-yd5hvpxzlffke.azurewebsites.net"
+    "value": "https://app-parking-frontend-sdqignc33rufa.azurewebsites.net"
+  },
+  "githubRunnerNetworkSettingsId": {
+    "type": "String",
+    "value": "/subscriptions/cb92ee6d-15c0-45db-9ebe-46de98b27caf/resourceGroups/rg-parking-hub-dev/providers/GitHub.Network/networkSettings/github-actions-network-settings"
   },
   "hubResourceGroup": {
     "type": "String",
@@ -25,7 +81,7 @@
   },
   "lisbonApiUrl": {
     "type": "String",
-    "value": "https://ca-parking-lisbon.redmushroom-90cac1a3.swedencentral.azurecontainerapps.io"
+    "value": "https://ca-parking-lisbon.gentlebush-1b6967ad.northeurope.azurecontainerapps.io"
   },
   "lisbonResourceGroup": {
     "type": "String",
@@ -55,9 +111,13 @@
     "type": "String",
     "value": "vm-madrid-api"
   },
+  "madridWindowsEventsDcrId": {
+    "type": "String",
+    "value": "/subscriptions/cb92ee6d-15c0-45db-9ebe-46de98b27caf/resourceGroups/rg-parking-hub-dev/providers/Microsoft.Insights/dataCollectionRules/dcr-madrid-windows-events"
+  },
   "parisApiUrl": {
     "type": "String",
-    "value": "http://10.0.1.4:3003"
+    "value": ""
   },
   "parisFqdn": {
     "type": "String",
@@ -71,9 +131,21 @@
     "type": "String",
     "value": "rg-parking-paris-dev"
   },
+  "parisSyslogDcrId": {
+    "type": "String",
+    "value": ""
+  },
   "parisVmName": {
     "type": "String",
-    "value": "vm-paris-api"
+    "value": ""
+  },
+  "vmHealthControlContainerAppName": {
+    "type": "String",
+    "value": "ca-vm-health-control"
+  },
+  "vmHealthControlUrl": {
+    "type": "String",
+    "value": "https://ca-vm-health-control.livelysand-7bf24936.northeurope.azurecontainerapps.io"
   },
   "vnetName": {
     "type": "String",

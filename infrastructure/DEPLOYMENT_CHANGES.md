@@ -2,6 +2,112 @@
 
 ## Recent Changes
 
+### July 15, 2026 - Fixed persistent InUseSubnetCannotBeDeleted and full end-to-end deployment failures
+
+**Status:** `./deploy.sh` now completes with zero failed resources. Verified: hub, Madrid VM,
+Berlin, Lisbon, Chaos Control, VM Health Control all `Succeeded`/`Running`. Paris stays
+intentionally undeployed (`deployParisVm: false`). Frontend deploys to **westeurope** (see below),
+everything else stays in `northeurope`.
+
+**Issue:** Every redeploy to an already-provisioned environment failed with
+`InUseSubnetCannotBeDeleted` on `snet-vms`, blocked by whatever happened to be attached (a private
+endpoint, or a VM's NIC) - a genuinely different, deeper bug than the one described in the February
+13 entry below, which only fixed a *different* subnet-recreate pattern (inline vs. child-resource
+subnets). Once that was fixed, five more distinct bugs surfaced one at a time, each only reachable
+after the previous one was resolved.
+
+**Root causes and fixes, in the order they were found:**
+
+1. **Subnet policy drift (the actual InUseSubnetCannotBeDeleted cause).** None of the hub subnets
+   declared `privateEndpointNetworkPolicies`, and the vnet resource itself never declared the
+   vnet-wide `privateEndpointVNetPolicies`. Azure's subnet/vnet PUT treats `properties` as a full
+   replace, so every redeploy silently asked Azure to reset both back to their provider defaults -
+   even though `snet-vms` hosts a private endpoint that requires them `Disabled`, and they were
+   already `Disabled` live. Toggling that policy while anything is attached to any subnet in the
+   vnet can't be done as an in-place patch, which surfaced as `InUseSubnetCannotBeDeleted` on
+   whichever attached resource happened to be in the way. Fixed by declaring both explicitly on
+   every subnet in `hub.bicep` and `github-runner-network.bicep`, and bumping the vnet resource to
+   API version `2024-05-01` (`privateEndpointVNetPolicies` isn't in the `2023-05-01` type schema).
+
+2. **Unconditional VM NICs.** `paris-api.bicep` and `madrid-api.bicep` created each VM's NIC with no
+   `if (deployVM)` guard, unlike the VM resource and its extensions. With `deployParisVm: false`,
+   `nic-paris-vm` was still created every deploy, permanently occupying an IP config on `snet-vms`.
+   Fixed by gating the NIC on `deployVM` in both modules; the orphaned `nic-paris-vm` was deleted
+   manually since no VM was ever attached to it.
+
+3. **Placeholder image vs. app-specific ports/probes.** None of the container image parameters are
+   overridden in `main.parameters.json`, so Lisbon/Berlin/Chaos Control all still run the default
+   `mcr.microsoft.com/azuredocs/containerapps-helloworld` image (port 80, no `/health`), while each
+   module's `ingress.targetPort` and liveness/readiness `httpGet` probes pointed at the real app's
+   future port and `/health`. The probes never passed, and (separately) simply having custom
+   `httpGet` probes at all caused the revision controller to hang indefinitely rather than just
+   report unhealthy - confirmed by a direct `az containerapp create` with no probes succeeding
+   instantly against the same image/environment. Probes were removed for now (each has a `TODO`
+   marking where to restore `/health`-based probes once real images are pushed).
+
+4. **ACR role-assignment name collision.** `acr-role-assignment.bicep` named its role assignment
+   `guid(acr.id, 'AcrPull')` - identical for every caller regardless of identity. All five callers
+   (Lisbon, Berlin, Chaos Control, VM Health Control, Berlin MCP) computed the same resource name,
+   so only the first to deploy actually got `AcrPull`; the rest failed with
+   `RoleAssignmentUpdateNotPermitted`. Fixed by including `principalId` in the `guid()` seed.
+
+5. **Container Apps environments cannot share a subnet.** Lisbon, Berlin, and Chaos Control each
+   provision their own managed environment, all originally pointed at `snet-container-apps`. This
+   is a hard Azure platform limit (confirmed with three identical `ManagedEnvironmentSubnetInUse`
+   failures even with dependency serialization) - not a race condition, not a sizing issue. Fixed
+   by giving each its own dedicated subnet in `hub.bicep`: `snet-lisbon-apps` (`10.0.6.0/24`),
+   `snet-berlin-apps` (`10.0.7.0/24`), `snet-berlin-mcp-apps` (`10.0.8.0/24`, for the currently
+   disabled Berlin MCP module). Chaos Control kept `snet-container-apps` unchanged.
+
+6. **App Service has a hard 0-quota block in `northeurope` on this subscription.** Every tier tried
+   (Basic B1, Free F1, Premium v3 P0v3, Premium v3 P1v3) failed identically with
+   `InternalSubscriptionIsOverQuotaForSku`, even where the Microsoft.Web usages API reported
+   available cores. Confirmed region-specific (not SKU-specific) by successfully creating the
+   identical P1v3 Linux plan instantly in `westeurope`. A self-service quota increase request via
+   the `Microsoft.Quota` API for App Service `B1` in `northeurope` was submitted and **denied**
+   (`QuotaNotAvailableForResource`) - this region appears to have a hard regional cap on App Service
+   VM capacity for this subscription that isn't self-service adjustable; a manual Azure support
+   ticket (with subscription support-plan-appropriate severity) would be the next step if
+   consolidating everything into `northeurope` is ever required. For now, added a separate
+   `frontendLocation` param (default `westeurope`) and pointed only the frontend module there -
+   every other resource stays in `location` (`northeurope`). This is fully valid: resources within
+   a resource group can each target any region independently of the resource group's own location.
+   Reverted the App Service Plan to Basic B1 (cost-appropriate) once the real blocker was fixed.
+
+**Also fixed, unrelated but adjacent:**
+- `main.parameters.json` had the VM admin password committed in plaintext. Rotated the credential
+  directly on the live Madrid VM via `az vm user update`, then removed the value from the tracked
+  file entirely - `deploy.sh` already prompts for it interactively and overrides whatever's in the
+  file, so it never needed to be stored there.
+- Split each VM's DCR/DCE association into two separate resources (`vm-dcr-association.bicep`,
+  `main.bicep`) - Azure Monitor requires the name `configurationAccessEndpoint` to be used
+  exclusively for the endpoint association, not combined with a `dataCollectionRuleId`.
+- Gave `snet-container-apps` a NAT gateway (shared with the runner subnet) for defense-in-depth
+  outbound connectivity, though this turned out not to be the actual blocker for image pulls
+  (Consumption-plan environments provision their own platform-managed outbound IP regardless).
+
+**Files Modified:** `main.bicep`, `main.parameters.json`, `modules/hub.bicep`,
+`modules/github-runner-network.bicep`, `modules/madrid-api.bicep`, `modules/paris-api.bicep`,
+`modules/vm-dcr-association.bicep`, `modules/lisbon-api.bicep`, `modules/berlin-api.bicep`,
+`modules/chaos-control.bicep`, `modules/vm-health-control.bicep`, `modules/berlin-mcp-server.bicep`,
+`modules/acr-role-assignment.bicep`, `modules/frontend.bicep`.
+
+**Teardown / redeploy for next time:**
+```bash
+# Teardown (see the "Cleaning Up" section below for the full command list)
+az group delete --name rg-parking-hub-dev     --yes --no-wait
+# ...and so on for every rg-parking-*-dev group
+
+# Redeploy - all fixes above are baked into the templates, no manual steps needed
+cd infrastructure
+./deploy.sh
+```
+A from-scratch deploy should hit none of the manual-intervention steps this session needed (those
+were all one-time cleanups of state left over from the *unfixed* bugs). The only interactive input
+`deploy.sh` asks for is the new VM admin password and a yes/no confirmation.
+
+---
+
 ### February 13, 2026 - Fixed VNet Subnet Management and Deployment Warnings
 
 **Issue:** Infrastructure redeployments were failing with `InUseSubnetCannotBeDeleted` error for the `snet-github-runners` subnet, plus several Bicep warnings (BCP318, no-hardcoded-env-urls).

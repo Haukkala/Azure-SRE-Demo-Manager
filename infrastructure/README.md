@@ -84,7 +84,7 @@ az bicep version
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `location` | Azure region for resources | `westeurope` |
+| `location` | Azure region for most resources | `northeurope` |
 | `environment` | Environment name (dev/test/prod) | `dev` |
 | `adminUsername` | Admin username for VMs | `azureadmin` |
 | `adminPassword` | Admin password for VMs (secure) | `P@ssw0rd123!` |
@@ -99,6 +99,7 @@ az bicep version
 | `vnetAddressPrefix` | VNet address space | `10.0.0.0/16` |
 | `vmSubnetPrefix` | VM subnet address space | `10.0.1.0/24` |
 | `containerSubnetPrefix` | Container Apps subnet address space | `10.0.2.0/23` |
+| `frontendLocation` | Region for the frontend App Service specifically | `westeurope` |
 
 ## Deployment
 
@@ -323,24 +324,51 @@ az group delete --name rg-parking-berlin-mcp-<env>     --yes --no-wait
 
 ## Troubleshooting
 
-### GitHub Runners Subnet Deployment
+### InUseSubnetCannotBeDeleted on redeploy
 
-**Issue**: Deployment fails with `InUseSubnetCannotBeDeleted` for `snet-github-runners` subnet.
+**Issue**: Redeploying to an already-provisioned environment fails with `InUseSubnetCannotBeDeleted`
+on `snet-vms` (or another subnet), blocked by whatever happens to be attached - a private endpoint,
+a VM NIC, etc.
 
-**Cause**: The subnet has a service association link from GitHub Actions networking that prevents deletion during VNet state reconciliation.
+**Cause**: None of the subnets in `hub.bicep` (or `github-runner-network.bicep`) declared
+`privateEndpointNetworkPolicies`, and the vnet resource didn't declare the vnet-wide
+`privateEndpointVNetPolicies` either. Azure's subnet/vnet PUT treats `properties` as a full replace,
+so every redeploy silently asked Azure to reset both back to their provider defaults - even though
+some subnets host private endpoints or delegated services that require them `Disabled`. Toggling
+that policy while anything is attached can't be done as an in-place patch, and surfaces as
+`InUseSubnetCannotBeDeleted`.
 
-**Solution**: VNet subnets are created as separate child resources instead of inline definitions to prevent Azure from attempting to delete existing subnets during redeployment. The `snet-github-runners` subnet is managed by the `github-runner-network.bicep` module.
+**Solution**: This is fixed as of July 15, 2026 (see `DEPLOYMENT_CHANGES.md`) - every subnet now
+explicitly declares `privateEndpointNetworkPolicies: 'Disabled'` and `defaultOutboundAccess: false`
+to match live reality, and the vnet resource explicitly declares
+`privateEndpointVNetPolicies: 'Disabled'` (requires API version `2024-03-01`+). If you still hit
+this on current code, check whether a subnet's live policy values have drifted from what's declared
+in Bicep and reconcile them explicitly rather than leaving the property unset.
 
-If you encounter this error on an older deployment:
-- Pull the latest infrastructure code and redeploy (preferred — prevents future occurrences).
-- Or remove the GitHub Network Settings resource first:
-  ```bash
-  az resource delete \
-    --resource-group rg-parking-hub-<env> \
-    --name github-actions-network-settings \
-    --resource-type GitHub.Network/networkSettings
-  ```
-  Then redeploy the infrastructure.
+### ManagedEnvironmentSubnetInUse
+
+**Issue**: A Container Apps module deployment fails with `ManagedEnvironmentSubnetInUse`.
+
+**Cause**: Azure Container Apps environments cannot share a subnet with each other - this is a hard
+platform limit, not a race condition or a sizing issue. Each environment needs its own dedicated
+delegated subnet.
+
+**Solution**: Lisbon, Berlin, and Chaos Control each provision their own environment; each now has
+its own dedicated subnet (`snet-lisbon-apps`, `snet-berlin-apps`, `snet-container-apps`
+respectively - see `hub.bicep`). If you add another module that creates a new managed environment,
+give it its own subnet too rather than reusing an existing one - unless you're reusing an *existing
+environment's ID* (like `vm-health-control.bicep` does via `chaosControl.outputs.containerAppEnvironmentId`),
+which is fine since that doesn't create a second environment.
+
+### App Service quota / frontend region
+
+The frontend App Service Plan deploys to `westeurope` (via the separate `frontendLocation` param),
+not `northeurope` like everything else. This subscription has a hard 0-quota block on App Service
+capacity in `northeurope` for every tier (confirmed for Basic, Free, and Premium v3) - a self-service
+quota increase request via the `Microsoft.Quota` API was submitted and denied
+(`QuotaNotAvailableForResource`). If this needs to be consolidated into `northeurope` later, file a
+manual Azure support ticket requesting an App Service capacity increase for that region/subscription,
+then set `frontendLocation` back to `northeurope` in `main.parameters.json` and redeploy.
 
 ### Bicep Compilation Errors
 
