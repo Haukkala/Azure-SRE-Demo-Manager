@@ -188,14 +188,26 @@ cd infrastructure
 
 The script deploys:
 
-- **Hub** — VNet, Log Analytics Workspace, Azure Container Registry
-- **Frontend** — React app on Azure App Service (Linux, B1 tier)
-- **Lisbon API** — Container App (Docker)
-- **Berlin API** — Container App (Docker)
-- **Madrid API** — Windows Server 2022 VM (Standard_B2s)
-- **Paris API** — Ubuntu 22.04 LTS VM (Standard_B2s)
-- **Chaos Control** — Container App (Docker)
+- **Hub** — VNet, Log Analytics Workspace, Azure Container Registry (`northeurope`)
+- **Frontend** — React app on Azure App Service (Linux, B1 tier, **`westeurope`** — see note below)
+- **Lisbon API** — Container App (Docker, `northeurope`)
+- **Berlin API** — Container App (Docker, `northeurope`)
+- **Madrid API** — Windows Server 2022 VM (Standard_D2s_v3, `northeurope`)
+- **Paris API** — Ubuntu 22.04 LTS VM (Standard_B2s, `northeurope`) — **not deployed by default**, see note below
+- **Chaos Control** — Container App (Docker, `northeurope`)
 - **Berlin MCP Server** — Container App (optional, set `deployBerlinMcp=true`)
+
+> **Note on regions**: everything deploys to `northeurope` except the frontend App Service, which
+> deploys to `westeurope` via the separate `frontendLocation` parameter. This subscription has a
+> hard 0-quota block on App Service capacity in `northeurope` — confirmed for every tier (Basic,
+> Free, Premium v3), not self-service adjustable — so the frontend runs in `westeurope` instead. See
+> [infrastructure/README.md](infrastructure/README.md) for the full details.
+>
+> **Note on Paris**: the Paris VM does not deploy by default (`deployParisVm: false` in
+> `infrastructure/main.parameters.json`). It was disabled while hardening the infrastructure, since
+> its NIC used to be created unconditionally and would occupy a subnet IP even when the VM itself
+> was switched off. Set `deployParisVm: true` and redeploy if you need the Linux/Syslog demo
+> scenario (Chat 5 in [demo/DEMO.md](demo/DEMO.md) is marked unavailable for the same reason).
 
 **Estimated monthly cost**: ~$120–180 (varies by region and usage; see [infrastructure/README.md](infrastructure/README.md) for details).
 
@@ -205,7 +217,7 @@ For full deployment instructions, see [infrastructure/README.md](infrastructure/
 
 ```bash
 az deployment sub create \
-  --location westeurope \
+  --location northeurope \
   --template-file infrastructure/main.bicep \
   --parameters infrastructure/main.parameters.example.json \
   --parameters adminPassword='<your-secure-password>'
