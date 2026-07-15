@@ -322,6 +322,35 @@ az group delete --name rg-parking-berlin-mcp-<env>     --yes --no-wait
 
 > ⚠️ **Cost reminder**: Azure resources continue to accrue charges until deleted. Run the cleanup commands above when the demo environment is no longer needed.
 
+> ⚠️ **Two things that can block a parallel `--no-wait` teardown** (seen July 15, 2026 - see
+> `DEPLOYMENT_CHANGES.md`):
+>
+> 1. **`rg-parking-hub-<env>` can fail and roll back** if it's deleted at the same time as
+>    `rg-parking-lisbon-<env>`, `rg-parking-berlin-<env>`, and `rg-parking-chaos-<env>`. Their
+>    Container Apps environments live in those groups but are bound to subnets *inside* the hub
+>    group's vnet; hub's NSGs/route tables/NAT gateway/vnet can't delete until those environments
+>    finish releasing their subnet delegations. If hub's group shows `Succeeded` (not `Deleting`)
+>    a few minutes after you kicked off the deletes, the app-environment groups probably aren't
+>    done yet - wait for them, then re-run `az group delete --name rg-parking-hub-<env> --yes --no-wait`.
+> 2. **`rg-parking-madrid-<env>` can fail and roll back** because of a Recovery Services Vault
+>    (`RSVault-northeurope-...`) that isn't created by this repo's Bicep at all - it's auto-enrolled
+>    by a landing-zone backup policy on `vm-madrid-api`. The vault must have its backup protection
+>    disabled (with data deleted) before the resource group can be deleted, and this landing zone
+>    blocks disabling the vault's soft-delete setting directly:
+>    ```bash
+>    az backup protection disable \
+>      --resource-group rg-parking-madrid-<env> \
+>      --vault-name <RSVault-name> \
+>      --container-name "iaasvmcontainerv2;rg-parking-madrid-<env>;vm-madrid-api" \
+>      --item-name vm-madrid-api \
+>      --delete-backup-data true --yes
+>    # then retry:
+>    az group delete --name rg-parking-madrid-<env> --yes --no-wait
+>    ```
+>    Find the vault name with `az resource list -g rg-parking-madrid-<env>` if it's not already known.
+>
+> Neither issue is something `deploy.sh` needs to worry about - they only affect manual teardown.
+
 ## Troubleshooting
 
 ### InUseSubnetCannotBeDeleted on redeploy
