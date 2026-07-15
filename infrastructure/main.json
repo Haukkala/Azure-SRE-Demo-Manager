@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "18336269409984905544"
+      "templateHash": "15154231709605584281"
     }
   },
   "parameters": {
@@ -4675,7 +4675,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "8497564863445236325"
+              "templateHash": "13586889847944273953"
             }
           },
           "parameters": {
@@ -4734,10 +4734,10 @@
               "location": "[parameters('location')]",
               "tags": "[parameters('tags')]",
               "sku": {
-                "name": "F1",
-                "tier": "Free",
-                "size": "F1",
-                "family": "F",
+                "name": "P0v3",
+                "tier": "PremiumV3",
+                "size": "P0v3",
+                "family": "Dv3",
                 "capacity": 1
               },
               "kind": "linux",
@@ -4770,7 +4770,7 @@
                 "httpsOnly": true,
                 "siteConfig": {
                   "linuxFxVersion": "NODE|18-lts",
-                  "alwaysOn": false,
+                  "alwaysOn": true,
                   "minTlsVersion": "1.2",
                   "ftpsState": "Disabled",
                   "appSettings": [

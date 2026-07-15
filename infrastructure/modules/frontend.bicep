@@ -16,22 +16,22 @@ param vmHealthControlUrl string = ''
 @description('Tags to apply to resources')
 param tags object = {}
 
-// App Service Plan (Linux, F1 Free tier).
-// NOTE: this subscription has 0 quota for the standardAv2Family VM family (covers Basic/Standard
-// tiers) in northeurope - Premium v3 has quota instead but costs meaningfully more. F1 runs on
-// shared multi-tenant compute and doesn't draw from that quota pool. Trade-offs: no custom
-// domains/SSL, ~60 min/day compute quota, no VNet integration, no Always On. Fine for a demo
-// frontend; move to a paid tier (and request an Av2 quota increase, or use Premium v3) for
-// anything beyond that.
+// App Service Plan (Linux, Premium v3 P0v3).
+// NOTE: this subscription's landing zone has 0 quota for standardAv2Family (Basic/Standard) in
+// northeurope, and F1 (Free) hit the identical InternalSubscriptionIsOverQuotaForSku block too -
+// this environment appears to disallow every non-Premium-v3 App Service Plan tier outright.
+// Premium v3 (standardDDv4Family) is the only tier confirmed to have available quota (360 cores).
+// This is a real recurring cost, unlike Basic/Free - request an Av2 quota increase if a cheaper
+// tier becomes viable later.
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: 'asp-parking-frontend'
   location: location
   tags: tags
   sku: {
-    name: 'F1'
-    tier: 'Free'
-    size: 'F1'
-    family: 'F'
+    name: 'P0v3'
+    tier: 'PremiumV3'
+    size: 'P0v3'
+    family: 'Dv3'
     capacity: 1
   }
   kind: 'linux'
@@ -64,7 +64,7 @@ resource appService 'Microsoft.Web/sites@2023-01-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'NODE|18-lts'
-      alwaysOn: false // Always On isn't available on the Free (F1) tier
+      alwaysOn: true
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
       appSettings: [
