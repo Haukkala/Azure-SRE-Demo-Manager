@@ -30,16 +30,19 @@ The infrastructure is organized into multiple resource groups for better managem
    - Application Insights
 
 5. **Madrid API Resource Group** (`rg-parking-madrid-{env}`)
-   - Windows Server 2022 VM (Standard_B2s)
+   - Windows Server 2022 VM (Standard_D2s_v3 — switched from Standard_B2s after hitting `SkuNotAvailable` in this region)
    - Network Interface
    - Public IP (optional)
    - Application Insights
 
-6. **Paris API Resource Group** (`rg-parking-paris-{env}`)
+6. **Paris API Resource Group** (`rg-parking-paris-{env}`) *(not deployed by default)*
    - Ubuntu Server 22.04 LTS VM (Standard_B2s)
    - Network Interface
    - Public IP (optional)
    - Application Insights
+   - Disabled by default (`deployParisVm=false` in `main.parameters.json`) — its NIC used to be
+     created unconditionally regardless of this flag, occupying a subnet IP even when switched off.
+     Set `deployParisVm=true` to re-enable it.
 
 7. **Chaos Control Resource Group** (`rg-parking-chaos-{env}`)
    - Container App Environment
@@ -58,7 +61,9 @@ The infrastructure is organized into multiple resource groups for better managem
 The infrastructure is designed for cost optimization:
 
 - **App Service Plan**: B1 tier (Basic) — approximately $13/month
-- **Virtual Machines**: Standard_B2s (2 vCPUs, 4 GB RAM) — approximately $30/month each
+- **Virtual Machines**: Madrid runs Standard_D2s_v3 (2 vCPUs, 8 GB RAM, ~$70/month — Standard_B2s
+  isn't available in every region); Paris would use Standard_B2s (2 vCPUs, 4 GB RAM, ~$30/month)
+  but is disabled by default (`deployParisVm=false`)
 - **Container Apps**: Consumption-based pricing with 0.25 vCPU and 0.5 Gi memory
 - **Storage**: StandardSSD_LRS for VM disks
 - **Log Analytics**: Pay-as-you-go with 30-day retention
@@ -87,7 +92,7 @@ az bicep version
 | `location` | Azure region for most resources | `northeurope` |
 | `environment` | Environment name (dev/test/prod) | `dev` |
 | `adminUsername` | Admin username for VMs | `azureadmin` |
-| `adminPassword` | Admin password for VMs (secure) | `P@ssw0rd123!` |
+| `adminPassword` | Admin password for VMs (secure). **Not stored in `main.parameters.json`** — `deploy.sh` prompts for it interactively at runtime and passes it as a separate `--parameters` override. Only needed as a direct parameter if you're calling `az deployment sub` yourself instead of using `deploy.sh`. | prompted interactively |
 
 ### Optional Parameters
 
@@ -100,6 +105,13 @@ az bicep version
 | `vmSubnetPrefix` | VM subnet address space | `10.0.1.0/24` |
 | `containerSubnetPrefix` | Container Apps subnet address space | `10.0.2.0/23` |
 | `frontendLocation` | Region for the frontend App Service specifically | `westeurope` |
+| `allowedSourceIpPrefix` | Source IP prefix (CIDR) allowed to reach SSH (22) and RDP (3389) on the VM subnet | `*` (any — demo only, see Security Considerations) |
+| `deployMadridVm` | Deploy the Madrid VM and its extensions | `true` |
+| `deployParisVm` | Deploy the Paris VM and its extensions | `true` in Bicep, but `false` in `main.parameters.json` (disabled by default — see the Resource Groups section above) |
+| `containerRegistrySku` | Azure Container Registry SKU (`Basic`/`Standard`/`Premium`) | `Basic` |
+| `githubActionsPrincipalId` | Object ID of the GitHub Actions service principal, granted access to deployment storage | `""` (empty — skips the role assignment) |
+| `runnerSubnetPrefix` | Subnet address space for GitHub-hosted runner networking | `10.0.3.0/24` |
+| `githubOrgDatabaseId` | GitHub organization `databaseId` (GraphQL) used to bind runner networking to your org | `""` (empty — skips runner network setup) |
 
 ## Deployment
 
